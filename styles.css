@@ -1,0 +1,175 @@
+/* ===== 基礎重置與變數 ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --bg-dark: #0f0f23;
+    --text-light: #fff;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-light);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* ===== 畫面控制 ===== */
+.screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ===== 開始畫面 ===== */
+#start-screen {
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%);
+}
+
+.start-content {
+    text-align: center;
+    padding: 2rem;
+}
+
+.start-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.start-content p {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 2rem;
+}
+
+/* ===== 開始按鈕 ===== */
+.start-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2.5rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-light);
+    background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
+    transition: all 0.3s ease;
+}
+
+.start-button:hover,
+.start-button:active {
+    transform: scale(1.05);
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.6);
+}
+
+.btn-icon {
+    font-size: 1.5rem;
+}
+
+/* ===== AR 畫面 ===== */
+#ar-screen {
+    background: #000;
+}
+
+#camera-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+}
+
+#fireworks-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* ===== 控制按鈕 ===== */
+.controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 20;
+}
+
+.control-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.control-btn:hover,
+.control-btn:active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== 錯誤畫面 ===== */
+#error-screen {
+    background: var(--bg-dark);
+}
+
+.error-content {
+    text-align: center;
+    padding: 2rem;
+}
+
+.error-content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.error-content p {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 2rem;
+}
+
+/* ===== 安全區域（iPhone 瀏海/底部） ===== */
+@supports (padding: max(0px)) {
+    .controls {
+        top: max(20px, env(safe-area-inset-top));
+        right: max(20px, env(safe-area-inset-right));
+    }
+}
