@@ -12,6 +12,7 @@ class ARFireworkApp {
         this.retryBtn = document.getElementById('retry-btn');
         this.exitBtn = document.getElementById('exit-btn');
         this.fullscreenBtn = document.getElementById('fullscreen-btn');
+        this.captureBtn = document.getElementById('capture-btn');
         this.video = document.getElementById('camera-video');
         this.canvas = document.getElementById('fireworks-canvas');
 
@@ -28,6 +29,7 @@ class ARFireworkApp {
         this.retryBtn.addEventListener('click', () => this.startAR());
         this.exitBtn.addEventListener('click', () => this.exitAR());
         this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+        this.captureBtn.addEventListener('click', () => this.captureAndShare());
 
         // 初始化煙火系統（自動發射始終開啟）
         this.fireworkSystem = new FireworkSystem(this.canvas);
@@ -160,6 +162,45 @@ class ARFireworkApp {
             case 'error':
                 this.errorScreen.classList.remove('hidden');
                 break;
+        }
+    }
+
+    async captureAndShare() {
+        try {
+            // 創建合成畫布
+            const captureCanvas = document.createElement('canvas');
+            captureCanvas.width = this.canvas.width;
+            captureCanvas.height = this.canvas.height;
+            const ctx = captureCanvas.getContext('2d');
+
+            // 繪製相機畫面
+            ctx.drawImage(this.video, 0, 0, captureCanvas.width, captureCanvas.height);
+
+            // 繪製煙火畫面
+            ctx.drawImage(this.canvas, 0, 0);
+
+            // 轉換為 Blob
+            const blob = await new Promise(resolve => captureCanvas.toBlob(resolve, 'image/png'));
+            const file = new File([blob], 'ar-fireworks.png', { type: 'image/png' });
+
+            // 嘗試使用 Web Share API
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: 'AR Fireworks',
+                    text: 'Check out my AR fireworks!'
+                });
+            } else {
+                // 降級：下載圖片
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ar-fireworks.png';
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        } catch (err) {
+            console.warn('Capture failed:', err);
         }
     }
 }
