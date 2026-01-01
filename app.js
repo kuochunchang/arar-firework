@@ -42,25 +42,43 @@ class ARFireworkApp {
             }
         });
 
-        // 監聽全螢幕變化
+        // 監聯全螢幕變化
         document.addEventListener('fullscreenchange', () => this.updateFullscreenButton());
+        document.addEventListener('webkitfullscreenchange', () => this.updateFullscreenButton());
     }
 
     toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.warn('全螢幕請求失敗:', err);
-            });
+        const elem = document.documentElement;
+
+        if (!this.isFullscreen()) {
+            // 進入全螢幕
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => console.warn('全螢幕失敗:', err));
+            } else if (elem.webkitRequestFullscreen) {
+                // iOS Safari
+                elem.webkitRequestFullscreen();
+            } else if (elem.webkitEnterFullscreen) {
+                elem.webkitEnterFullscreen();
+            }
         } else {
-            document.exitFullscreen();
+            // 退出全螢幕
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
         }
     }
 
+    isFullscreen() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement);
+    }
+
     updateFullscreenButton() {
-        if (document.fullscreenElement) {
-            this.fullscreenBtn.textContent = '⛶ 退出全螢幕';
+        if (this.isFullscreen()) {
+            this.fullscreenBtn.textContent = '⛶ Exit Fullscreen';
         } else {
-            this.fullscreenBtn.textContent = '⛶ 全螢幕';
+            this.fullscreenBtn.textContent = '⛶ Fullscreen';
         }
     }
 
@@ -87,6 +105,11 @@ class ARFireworkApp {
 
             // 切換到 AR 畫面
             this.showScreen('ar');
+
+            // 啟動音效系統（iOS 需要用戶互動後才能播放）
+            if (this.fireworkSystem.soundSystem) {
+                this.fireworkSystem.soundSystem.resume();
+            }
 
             // 開始煙火動畫
             this.fireworkSystem.start();

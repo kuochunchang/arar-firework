@@ -287,6 +287,7 @@ class FireworkSystem {
         this.autoLaunch = true;
         this.lastAutoLaunch = 0;
         this.autoLaunchInterval = 1500; // 1.5秒
+        this.maxFireworks = 5; // 同時最多 5 個煙火，避免效能問題
 
         // 初始化音效系統
         this.soundSystem = new FireworkSoundSystem();
@@ -302,6 +303,11 @@ class FireworkSystem {
     }
 
     launch() {
+        // 檢查是否已達到同時煙火上限
+        if (this.fireworks.length >= this.maxFireworks) {
+            return;
+        }
+
         // 在畫面中隨機位置產生煙火（高度在畫面上半部）
         const targetX = this.canvas.width * 0.25 + Math.random() * this.canvas.width * 0.5;
         const targetY = this.canvas.height * 0.25 + Math.random() * this.canvas.height * 0.25;

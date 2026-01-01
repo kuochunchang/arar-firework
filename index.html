@@ -1,55 +1,59 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>🎆 AR 煙火</title>
+    <meta name="description"
+        content="AR Fireworks - Experience stunning fireworks in augmented reality through your camera">
+    <title>AR Fireworks</title>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎆</text></svg>">
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <!-- 開始畫面 -->
+    <!-- Start Screen -->
     <div id="start-screen" class="screen">
         <div class="start-content">
-            <h1>🎆 AR 煙火</h1>
-            <p>在真實場景中體驗煙火效果</p>
+            <h1>AR Fireworks</h1>
+            <p>Experience fireworks in augmented reality</p>
             <button id="start-btn" class="start-button">
                 <span class="btn-icon">📸</span>
-                開啟相機
+                Start Camera
             </button>
+            <p class="hint">Point your camera at the sky and enjoy the show!</p>
         </div>
     </div>
 
-    <!-- AR 體驗畫面 -->
+    <!-- AR Experience Screen -->
     <div id="ar-screen" class="screen hidden">
-        <!-- 相機影像 -->
+        <!-- Camera Video -->
         <video id="camera-video" autoplay playsinline muted></video>
 
-        <!-- 煙火畫布 -->
+        <!-- Fireworks Canvas -->
         <canvas id="fireworks-canvas"></canvas>
 
-        <!-- 控制按鈕 -->
+        <!-- Control Buttons -->
         <div class="controls">
-            <button id="fullscreen-btn" class="control-btn" title="全螢幕">
-                ⛶ 全螢幕
+            <button id="fullscreen-btn" class="control-btn" title="Fullscreen">
+                ⛶ Fullscreen
             </button>
-            <button id="exit-btn" class="control-btn" title="退出">
-                ✕ 退出
+            <button id="exit-btn" class="control-btn" title="Exit">
+                ✕ Exit
             </button>
         </div>
     </div>
 
-    <!-- 錯誤提示 -->
+    <!-- Error Screen -->
     <div id="error-screen" class="screen hidden">
         <div class="error-content">
-            <h2>⚠️ 無法存取相機</h2>
-            <p>請確認已授權相機權限，並使用支援的瀏覽器。</p>
-            <button id="retry-btn" class="start-button">重試</button>
+            <h2>Camera Access Failed</h2>
+            <p>Please grant camera permission and use a supported browser.</p>
+            <p class="hint">Tip: For iOS, use Safari. For Android, use Chrome.</p>
+            <button id="retry-btn" class="start-button">Retry</button>
         </div>
     </div>
 
