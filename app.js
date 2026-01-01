@@ -11,6 +11,8 @@ class ARFireworkApp {
         this.startBtn = document.getElementById('start-btn');
         this.retryBtn = document.getElementById('retry-btn');
         this.exitBtn = document.getElementById('exit-btn');
+        this.fullscreenBtn = document.getElementById('fullscreen-btn');
+        this.toast = document.getElementById('toast');
         this.video = document.getElementById('camera-video');
         this.canvas = document.getElementById('fireworks-canvas');
 
@@ -26,6 +28,7 @@ class ARFireworkApp {
         this.startBtn.addEventListener('click', () => this.startAR());
         this.retryBtn.addEventListener('click', () => this.startAR());
         this.exitBtn.addEventListener('click', () => this.exitAR());
+        this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
 
         // 初始化煙火系統（自動發射始終開啟）
         this.fireworkSystem = new FireworkSystem(this.canvas);
@@ -40,6 +43,10 @@ class ARFireworkApp {
             }
         });
 
+        // 監聽全螢幕變化
+        document.addEventListener('fullscreenchange', () => this.handleFullscreenChange());
+        document.addEventListener('webkitfullscreenchange', () => this.handleFullscreenChange());
+
         // 確保任何用戶互動都能啟動音效（iOS 要求）
         const resumeAudio = () => {
             if (this.fireworkSystem && this.fireworkSystem.soundSystem) {
@@ -48,6 +55,60 @@ class ARFireworkApp {
         };
         document.addEventListener('touchstart', resumeAudio, { once: true });
         document.addEventListener('click', resumeAudio, { once: true });
+    }
+
+    // 非阻塞的 Toast 通知
+    showToast(message, duration = 3000) {
+        if (!this.toast) return;
+        this.toast.textContent = message;
+        this.toast.classList.remove('hidden');
+        setTimeout(() => {
+            this.toast.classList.add('hidden');
+        }, duration);
+    }
+
+    toggleFullscreen() {
+        const elem = document.documentElement;
+
+        // 檢查是否支援全螢幕
+        const canFullscreen = elem.requestFullscreen || elem.webkitRequestFullscreen;
+
+        if (!canFullscreen) {
+            this.showToast('Tip: Add to Home Screen for fullscreen');
+            return;
+        }
+
+        if (!this.isFullscreen()) {
+            const request = elem.requestFullscreen || elem.webkitRequestFullscreen;
+            request.call(elem).catch(() => {
+                this.showToast('Fullscreen not available');
+            });
+        } else {
+            const exit = document.exitFullscreen || document.webkitExitFullscreen;
+            if (exit) exit.call(document);
+        }
+    }
+
+    isFullscreen() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement);
+    }
+
+    handleFullscreenChange() {
+        // 更新按鈕文字
+        if (this.fullscreenBtn) {
+            this.fullscreenBtn.textContent = this.isFullscreen() ? '⛶ Exit' : '⛶ Fullscreen';
+        }
+
+        // 重新調整大小並重啟動畫（修復問題的關鍵）
+        setTimeout(() => {
+            if (this.fireworkSystem) {
+                this.fireworkSystem.resize();
+                // 確保動畫繼續運行
+                if (this.stream && !this.fireworkSystem.isRunning) {
+                    this.fireworkSystem.start();
+                }
+            }
+        }, 100);
     }
 
     async startAR() {

@@ -179,3 +179,24 @@ body {
         right: max(20px, env(safe-area-inset-right));
     }
 }
+
+/* ===== Toast 通知 ===== */
+.toast {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.toast.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
