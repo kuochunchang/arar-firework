@@ -301,28 +301,87 @@ class FireworkSystem {
         this.canvas.height = window.innerHeight;
     }
 
-    launch(x, y) {
-        // 從底部發射到指定位置
-        const targetY = y || this.canvas.height * 0.2 + Math.random() * this.canvas.height * 0.3;
-        const launchX = x || Math.random() * this.canvas.width;
+    launch() {
+        // 在畫面中隨機位置產生煙火（高度在畫面上半部）
+        const targetX = this.canvas.width * 0.25 + Math.random() * this.canvas.width * 0.5;
+        const targetY = this.canvas.height * 0.25 + Math.random() * this.canvas.height * 0.25;
 
-        const firework = new Firework(
-            launchX,
-            this.canvas.height + 10,
-            targetY
-        );
+        // 從目標點下方一段距離發射（模擬短距離上升）
+        const launchDistance = 80 + Math.random() * 60;
+        const startY = targetY + launchDistance;
+
+        const firework = new Firework(targetX, startY, targetY);
 
         // 設定音效回呼
-        firework.onExplode = () => this.soundSystem.playExplosion();
+        firework.onExplode = () => {
+            this.soundSystem.playExplosion();
+        };
 
         this.fireworks.push(firework);
-        this.soundSystem.playLaunch();
     }
 
-    launchAtPosition(x, y) {
-        // 在觸控位置發射並爆炸
-        const targetY = Math.max(50, y - 100 - Math.random() * 100);
-        this.fireworks.push(new Firework(x, this.canvas.height + 10, targetY));
+    createExplosion(firework) {
+        const particleCount = 150 + Math.floor(Math.random() * 80);
+        const explosionType = Math.random();
+        const colors = [firework.color];
+
+        for (let c = 0; c < 2; c++) {
+            if (Math.random() > 0.3) {
+                colors.push(FIREWORK_COLORS[Math.floor(Math.random() * FIREWORK_COLORS.length)]);
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            let angle, speed;
+
+            if (explosionType < 0.3) {
+                angle = (Math.PI * 2 / particleCount) * i;
+                speed = 1.5 + Math.random() * 2.5; // 縮小一半
+            } else if (explosionType < 0.6) {
+                angle = Math.random() * Math.PI * 2;
+                speed = 0.5 + Math.random() * 3.5; // 縮小一半
+            } else {
+                const t = (Math.PI * 2 / particleCount) * i;
+                angle = t;
+                speed = 1 + Math.abs(Math.sin(t * 3)) * 2.5; // 縮小一半
+            }
+
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const velocity = {
+                x: Math.cos(angle) * speed,
+                y: Math.sin(angle) * speed
+            };
+
+            firework.particles.push(new Particle(
+                firework.x, firework.y, color, velocity,
+                0.6 + Math.random() * 0.8, // 更細的粒子
+                0.012 + Math.random() * 0.015, // 稍快衰減
+                0.03
+            ));
+        }
+
+        // 核心閃光
+        for (let i = 0; i < 30; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 3;
+            firework.particles.push(new Particle(
+                firework.x, firework.y, '#ffffff',
+                { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed },
+                1.5, 0.02, 0.02
+            ));
+        }
+
+        // 尾焰粒子
+        for (let i = 0; i < 50; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 0.5 + Math.random() * 2;
+            firework.particles.push(new Particle(
+                firework.x, firework.y,
+                colors[Math.floor(Math.random() * colors.length)],
+                { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed },
+                0.5 + Math.random() * 0.5, 0.015, 0.03
+            ));
+        }
     }
 
     start() {

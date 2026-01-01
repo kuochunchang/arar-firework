@@ -11,6 +11,7 @@ class ARFireworkApp {
         this.startBtn = document.getElementById('start-btn');
         this.retryBtn = document.getElementById('retry-btn');
         this.exitBtn = document.getElementById('exit-btn');
+        this.fullscreenBtn = document.getElementById('fullscreen-btn');
         this.video = document.getElementById('camera-video');
         this.canvas = document.getElementById('fireworks-canvas');
 
@@ -26,6 +27,7 @@ class ARFireworkApp {
         this.startBtn.addEventListener('click', () => this.startAR());
         this.retryBtn.addEventListener('click', () => this.startAR());
         this.exitBtn.addEventListener('click', () => this.exitAR());
+        this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
 
         // 初始化煙火系統（自動發射始終開啟）
         this.fireworkSystem = new FireworkSystem(this.canvas);
@@ -39,6 +41,27 @@ class ARFireworkApp {
                 this.fireworkSystem.start();
             }
         });
+
+        // 監聽全螢幕變化
+        document.addEventListener('fullscreenchange', () => this.updateFullscreenButton());
+    }
+
+    toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.warn('全螢幕請求失敗:', err);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    updateFullscreenButton() {
+        if (document.fullscreenElement) {
+            this.fullscreenBtn.textContent = '⛶ 退出全螢幕';
+        } else {
+            this.fullscreenBtn.textContent = '⛶ 全螢幕';
+        }
     }
 
     async startAR() {
