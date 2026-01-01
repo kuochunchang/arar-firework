@@ -11,21 +11,25 @@ class ARFireworkApp {
         this.startBtn = document.getElementById('start-btn');
         this.retryBtn = document.getElementById('retry-btn');
         this.exitBtn = document.getElementById('exit-btn');
+        this.freezeBtn = document.getElementById('freeze-btn');
         this.video = document.getElementById('camera-video');
+        this.frozenCanvas = document.getElementById('frozen-canvas');
         this.canvas = document.getElementById('fireworks-canvas');
 
         // State
         this.stream = null;
         this.fireworkSystem = null;
+        this.isFrozen = false;
 
         this.init();
     }
 
     init() {
-        // Bindrevents
+        // Bind events
         this.startBtn.addEventListener('click', () => this.startAR());
         this.retryBtn.addEventListener('click', () => this.startAR());
         this.exitBtn.addEventListener('click', () => this.exitAR());
+        this.freezeBtn.addEventListener('click', () => this.toggleFreeze());
 
         // Initialize firework system (auto launch always on)
         this.fireworkSystem = new FireworkSystem(this.canvas);
@@ -48,6 +52,40 @@ class ARFireworkApp {
         };
         document.addEventListener('touchstart', resumeAudio, { once: true });
         document.addEventListener('click', resumeAudio, { once: true });
+    }
+
+    toggleFreeze() {
+        if (!this.isFrozen) {
+            // Freeze: capture current frame
+            this.freezeBackground();
+            this.freezeBtn.textContent = '▶ Resume';
+            this.isFrozen = true;
+        } else {
+            // Unfreeze: show live video
+            this.unfreezeBackground();
+            this.freezeBtn.textContent = '◉ Freeze';
+            this.isFrozen = false;
+        }
+    }
+
+    freezeBackground() {
+        // Set canvas size to match video
+        this.frozenCanvas.width = this.video.videoWidth;
+        this.frozenCanvas.height = this.video.videoHeight;
+
+        // Draw current video frame to frozen canvas
+        const ctx = this.frozenCanvas.getContext('2d');
+        ctx.drawImage(this.video, 0, 0);
+
+        // Show frozen canvas, hide video
+        this.frozenCanvas.classList.remove('hidden');
+        this.video.style.display = 'none';
+    }
+
+    unfreezeBackground() {
+        // Hide frozen canvas, show video
+        this.frozenCanvas.classList.add('hidden');
+        this.video.style.display = 'block';
     }
 
     async startAR() {
@@ -74,6 +112,12 @@ class ARFireworkApp {
             // Switch to AR screen
             this.showScreen('ar');
 
+            // Reset freeze state
+            this.isFrozen = false;
+            this.freezeBtn.textContent = '◉ Freeze';
+            this.frozenCanvas.classList.add('hidden');
+            this.video.style.display = 'block';
+
             // Start audio system (iOS requires user interaction)
             if (this.fireworkSystem.soundSystem) {
                 this.fireworkSystem.soundSystem.resume();
@@ -92,6 +136,10 @@ class ARFireworkApp {
         // Stop fireworks
         this.fireworkSystem.stop();
         this.fireworkSystem.clear();
+
+        // Reset freeze state
+        this.isFrozen = false;
+        this.unfreezeBackground();
 
         // Stop camera
         if (this.stream) {

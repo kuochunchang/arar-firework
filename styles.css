@@ -115,6 +115,20 @@ body {
     z-index: 1;
 }
 
+#frozen-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+}
+
+#frozen-canvas.hidden {
+    display: none;
+}
+
 #fireworks-canvas {
     position: absolute;
     top: 0;

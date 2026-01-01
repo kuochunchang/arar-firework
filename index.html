@@ -29,6 +29,9 @@
 
     <!-- AR Experience Screen -->
     <div id="ar-screen" class="screen hidden">
+        <!-- Frozen Background Canvas -->
+        <canvas id="frozen-canvas" class="hidden"></canvas>
+
         <!-- Camera Video -->
         <video id="camera-video" autoplay playsinline muted></video>
 
@@ -37,6 +40,9 @@
 
         <!-- Control Buttons -->
         <div class="controls">
+            <button id="freeze-btn" class="control-btn" title="Freeze">
+                ◉ Freeze Background
+            </button>
             <button id="exit-btn" class="control-btn" title="Exit">
                 ✕ Exit
             </button>
