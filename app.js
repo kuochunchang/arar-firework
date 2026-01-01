@@ -11,7 +11,6 @@ class ARFireworkApp {
         this.startBtn = document.getElementById('start-btn');
         this.retryBtn = document.getElementById('retry-btn');
         this.exitBtn = document.getElementById('exit-btn');
-        this.fullscreenBtn = document.getElementById('fullscreen-btn');
         this.video = document.getElementById('camera-video');
         this.canvas = document.getElementById('fireworks-canvas');
 
@@ -27,7 +26,6 @@ class ARFireworkApp {
         this.startBtn.addEventListener('click', () => this.startAR());
         this.retryBtn.addEventListener('click', () => this.startAR());
         this.exitBtn.addEventListener('click', () => this.exitAR());
-        this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
 
         // 初始化煙火系統（自動發射始終開啟）
         this.fireworkSystem = new FireworkSystem(this.canvas);
@@ -42,10 +40,6 @@ class ARFireworkApp {
             }
         });
 
-        // 監聽全螢幕變化
-        document.addEventListener('fullscreenchange', () => this.handleFullscreenChange());
-        document.addEventListener('webkitfullscreenchange', () => this.handleFullscreenChange());
-
         // 確保任何用戶互動都能啟動音效（iOS 要求）
         const resumeAudio = () => {
             if (this.fireworkSystem && this.fireworkSystem.soundSystem) {
@@ -54,62 +48,6 @@ class ARFireworkApp {
         };
         document.addEventListener('touchstart', resumeAudio, { once: true });
         document.addEventListener('click', resumeAudio, { once: true });
-    }
-
-    toggleFullscreen() {
-        // iOS Safari 只支援 video 全螢幕
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-        if (isIOS) {
-            // iOS: 嘗試影片全螢幕
-            if (this.video.webkitEnterFullscreen) {
-                this.video.webkitEnterFullscreen();
-            } else {
-                alert('Tip: Add this page to Home Screen for fullscreen experience!\n\nTap Share → Add to Home Screen');
-            }
-            return;
-        }
-
-        const elem = document.documentElement;
-
-        if (!this.isFullscreen()) {
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(err => {
-                    alert('Fullscreen not supported.\n\nTip: Add to Home Screen for fullscreen.');
-                });
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            }
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
-        }
-    }
-
-    isFullscreen() {
-        return !!(document.fullscreenElement || document.webkitFullscreenElement);
-    }
-
-    handleFullscreenChange() {
-        this.updateFullscreenButton();
-
-        // 延遲重新調整大小，確保瀏覽器已完成全螢幕轉換
-        setTimeout(() => {
-            if (this.fireworkSystem) {
-                this.fireworkSystem.resize();
-            }
-        }, 100);
-    }
-
-    updateFullscreenButton() {
-        if (this.isFullscreen()) {
-            this.fullscreenBtn.textContent = '⛶ Exit Fullscreen';
-        } else {
-            this.fullscreenBtn.textContent = '⛶ Fullscreen';
-        }
     }
 
     async startAR() {
