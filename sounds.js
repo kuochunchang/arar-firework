@@ -7,20 +7,29 @@ class FireworkSoundSystem {
     constructor() {
         this.audioContext = null;
         this.enabled = true;
+        this.initialized = false;
     }
 
     init() {
-        try {
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        } catch (e) {
-            console.warn('Web Audio API 不支援:', e);
-            this.enabled = false;
-        }
+        // 延遲初始化，等待用戶互動
+        this.enabled = true;
     }
 
     resume() {
+        // 在用戶互動時創建 AudioContext（iOS 要求）
+        if (!this.audioContext && this.enabled) {
+            try {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                this.initialized = true;
+            } catch (e) {
+                console.warn('Web Audio API not supported:', e);
+                this.enabled = false;
+                return;
+            }
+        }
+
         if (this.audioContext && this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
+            this.audioContext.resume().catch(e => console.warn('Audio resume failed:', e));
         }
     }
 

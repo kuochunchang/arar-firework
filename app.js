@@ -12,7 +12,6 @@ class ARFireworkApp {
         this.retryBtn = document.getElementById('retry-btn');
         this.exitBtn = document.getElementById('exit-btn');
         this.fullscreenBtn = document.getElementById('fullscreen-btn');
-        this.captureBtn = document.getElementById('capture-btn');
         this.video = document.getElementById('camera-video');
         this.canvas = document.getElementById('fireworks-canvas');
 
@@ -29,7 +28,6 @@ class ARFireworkApp {
         this.retryBtn.addEventListener('click', () => this.startAR());
         this.exitBtn.addEventListener('click', () => this.exitAR());
         this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
-        this.captureBtn.addEventListener('click', () => this.captureAndShare());
 
         // 初始化煙火系統（自動發射始終開啟）
         this.fireworkSystem = new FireworkSystem(this.canvas);
@@ -44,9 +42,18 @@ class ARFireworkApp {
             }
         });
 
-        // 監聯全螢幕變化
-        document.addEventListener('fullscreenchange', () => this.updateFullscreenButton());
-        document.addEventListener('webkitfullscreenchange', () => this.updateFullscreenButton());
+        // 監聽全螢幕變化
+        document.addEventListener('fullscreenchange', () => this.handleFullscreenChange());
+        document.addEventListener('webkitfullscreenchange', () => this.handleFullscreenChange());
+
+        // 確保任何用戶互動都能啟動音效（iOS 要求）
+        const resumeAudio = () => {
+            if (this.fireworkSystem && this.fireworkSystem.soundSystem) {
+                this.fireworkSystem.soundSystem.resume();
+            }
+        };
+        document.addEventListener('touchstart', resumeAudio, { once: true });
+        document.addEventListener('click', resumeAudio, { once: true });
     }
 
     toggleFullscreen() {
@@ -84,6 +91,17 @@ class ARFireworkApp {
 
     isFullscreen() {
         return !!(document.fullscreenElement || document.webkitFullscreenElement);
+    }
+
+    handleFullscreenChange() {
+        this.updateFullscreenButton();
+
+        // 延遲重新調整大小，確保瀏覽器已完成全螢幕轉換
+        setTimeout(() => {
+            if (this.fireworkSystem) {
+                this.fireworkSystem.resize();
+            }
+        }, 100);
     }
 
     updateFullscreenButton() {
@@ -162,45 +180,6 @@ class ARFireworkApp {
             case 'error':
                 this.errorScreen.classList.remove('hidden');
                 break;
-        }
-    }
-
-    async captureAndShare() {
-        try {
-            // 創建合成畫布
-            const captureCanvas = document.createElement('canvas');
-            captureCanvas.width = this.canvas.width;
-            captureCanvas.height = this.canvas.height;
-            const ctx = captureCanvas.getContext('2d');
-
-            // 繪製相機畫面
-            ctx.drawImage(this.video, 0, 0, captureCanvas.width, captureCanvas.height);
-
-            // 繪製煙火畫面
-            ctx.drawImage(this.canvas, 0, 0);
-
-            // 轉換為 Blob
-            const blob = await new Promise(resolve => captureCanvas.toBlob(resolve, 'image/png'));
-            const file = new File([blob], 'ar-fireworks.png', { type: 'image/png' });
-
-            // 嘗試使用 Web Share API
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    files: [file],
-                    title: 'AR Fireworks',
-                    text: 'Check out my AR fireworks!'
-                });
-            } else {
-                // 降級：下載圖片
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'ar-fireworks.png';
-                a.click();
-                URL.revokeObjectURL(url);
-            }
-        } catch (err) {
-            console.warn('Capture failed:', err);
         }
     }
 }
