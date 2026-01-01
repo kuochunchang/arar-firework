@@ -1,22 +1,20 @@
 /**
- * AR 煙火 - 主程式
+ * AR Fireworks - Main Application
  */
 
 class ARFireworkApp {
     constructor() {
-        // DOM 元素
+        // DOM Elements
         this.startScreen = document.getElementById('start-screen');
         this.arScreen = document.getElementById('ar-screen');
         this.errorScreen = document.getElementById('error-screen');
         this.startBtn = document.getElementById('start-btn');
         this.retryBtn = document.getElementById('retry-btn');
         this.exitBtn = document.getElementById('exit-btn');
-        this.fullscreenBtn = document.getElementById('fullscreen-btn');
-        this.toast = document.getElementById('toast');
         this.video = document.getElementById('camera-video');
         this.canvas = document.getElementById('fireworks-canvas');
 
-        // 狀態
+        // State
         this.stream = null;
         this.fireworkSystem = null;
 
@@ -24,17 +22,16 @@ class ARFireworkApp {
     }
 
     init() {
-        // 綁定事件
+        // Bindrevents
         this.startBtn.addEventListener('click', () => this.startAR());
         this.retryBtn.addEventListener('click', () => this.startAR());
         this.exitBtn.addEventListener('click', () => this.exitAR());
-        this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
 
-        // 初始化煙火系統（自動發射始終開啟）
+        // Initialize firework system (auto launch always on)
         this.fireworkSystem = new FireworkSystem(this.canvas);
         this.fireworkSystem.setAutoLaunch(true);
 
-        // 處理頁面可見性變化
+        // Handle page visibility change
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && this.stream) {
                 this.fireworkSystem.stop();
@@ -43,11 +40,7 @@ class ARFireworkApp {
             }
         });
 
-        // 監聽全螢幕變化
-        document.addEventListener('fullscreenchange', () => this.handleFullscreenChange());
-        document.addEventListener('webkitfullscreenchange', () => this.handleFullscreenChange());
-
-        // 確保任何用戶互動都能啟動音效（iOS 要求）
+        // Ensure audio works on iOS (requires user interaction)
         const resumeAudio = () => {
             if (this.fireworkSystem && this.fireworkSystem.soundSystem) {
                 this.fireworkSystem.soundSystem.resume();
@@ -57,63 +50,9 @@ class ARFireworkApp {
         document.addEventListener('click', resumeAudio, { once: true });
     }
 
-    // 非阻塞的 Toast 通知
-    showToast(message, duration = 3000) {
-        if (!this.toast) return;
-        this.toast.textContent = message;
-        this.toast.classList.remove('hidden');
-        setTimeout(() => {
-            this.toast.classList.add('hidden');
-        }, duration);
-    }
-
-    toggleFullscreen() {
-        const elem = document.documentElement;
-
-        // 檢查是否支援全螢幕
-        const canFullscreen = elem.requestFullscreen || elem.webkitRequestFullscreen;
-
-        if (!canFullscreen) {
-            this.showToast('Tip: Add to Home Screen for fullscreen');
-            return;
-        }
-
-        if (!this.isFullscreen()) {
-            const request = elem.requestFullscreen || elem.webkitRequestFullscreen;
-            request.call(elem).catch(() => {
-                this.showToast('Fullscreen not available');
-            });
-        } else {
-            const exit = document.exitFullscreen || document.webkitExitFullscreen;
-            if (exit) exit.call(document);
-        }
-    }
-
-    isFullscreen() {
-        return !!(document.fullscreenElement || document.webkitFullscreenElement);
-    }
-
-    handleFullscreenChange() {
-        // 更新按鈕文字
-        if (this.fullscreenBtn) {
-            this.fullscreenBtn.textContent = this.isFullscreen() ? '⛶ Exit' : '⛶ Fullscreen';
-        }
-
-        // 重新調整大小並重啟動畫（修復問題的關鍵）
-        setTimeout(() => {
-            if (this.fireworkSystem) {
-                this.fireworkSystem.resize();
-                // 確保動畫繼續運行
-                if (this.stream && !this.fireworkSystem.isRunning) {
-                    this.fireworkSystem.start();
-                }
-            }
-        }, 100);
-    }
-
     async startAR() {
         try {
-            // 請求相機權限（優先使用後鏡頭）
+            // Request camera permission (prefer rear camera)
             const constraints = {
                 video: {
                     facingMode: { ideal: 'environment' },
@@ -126,41 +65,41 @@ class ARFireworkApp {
             this.stream = await navigator.mediaDevices.getUserMedia(constraints);
             this.video.srcObject = this.stream;
 
-            // 等待影片載入
+            // Wait for video to load
             await new Promise((resolve) => {
                 this.video.onloadedmetadata = resolve;
             });
             await this.video.play();
 
-            // 切換到 AR 畫面
+            // Switch to AR screen
             this.showScreen('ar');
 
-            // 啟動音效系統（iOS 需要用戶互動後才能播放）
+            // Start audio system (iOS requires user interaction)
             if (this.fireworkSystem.soundSystem) {
                 this.fireworkSystem.soundSystem.resume();
             }
 
-            // 開始煙火動畫
+            // Start fireworks animation
             this.fireworkSystem.start();
 
         } catch (error) {
-            console.error('相機存取失敗:', error);
+            console.error('Camera access failed:', error);
             this.showScreen('error');
         }
     }
 
     exitAR() {
-        // 停止煙火
+        // Stop fireworks
         this.fireworkSystem.stop();
         this.fireworkSystem.clear();
 
-        // 停止相機
+        // Stop camera
         if (this.stream) {
             this.stream.getTracks().forEach(track => track.stop());
             this.stream = null;
         }
 
-        // 返回開始畫面
+        // Return to start screen
         this.showScreen('start');
     }
 
@@ -183,7 +122,7 @@ class ARFireworkApp {
     }
 }
 
-// 頁面載入完成後初始化
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new ARFireworkApp();
 });
