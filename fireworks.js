@@ -54,33 +54,40 @@ class Particle {
     }
 
     draw(ctx) {
+        // 使用添加混合模式，讓煙火與背景自然融合
+        ctx.globalCompositeOperation = 'lighter';
+
         // 繪製軌跡
         for (let i = 0; i < this.trail.length; i++) {
             const t = this.trail[i];
-            const trailAlpha = (i / this.trail.length) * this.alpha * 0.5;
+            const trailAlpha = (i / this.trail.length) * this.alpha * 0.4;
             ctx.beginPath();
             ctx.arc(t.x, t.y, this.size * 0.5, 0, Math.PI * 2);
             ctx.fillStyle = this.colorWithAlpha(trailAlpha);
             ctx.fill();
         }
 
-        // 繪製粒子
+        // 繪製粒子核心
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.colorWithAlpha(this.alpha);
+        ctx.fillStyle = this.colorWithAlpha(this.alpha * 0.9);
         ctx.fill();
 
-        // 光暈效果
+        // 大範圍柔和光暈（讓煙火看起來更遠、更自然）
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
         const gradient = ctx.createRadialGradient(
             this.x, this.y, 0,
-            this.x, this.y, this.size * 2
+            this.x, this.y, this.size * 4
         );
-        gradient.addColorStop(0, this.colorWithAlpha(this.alpha * 0.5));
+        gradient.addColorStop(0, this.colorWithAlpha(this.alpha * 0.3));
+        gradient.addColorStop(0.4, this.colorWithAlpha(this.alpha * 0.15));
         gradient.addColorStop(1, this.colorWithAlpha(0));
         ctx.fillStyle = gradient;
         ctx.fill();
+
+        // 恢復預設混合模式
+        ctx.globalCompositeOperation = 'source-over';
     }
 
     colorWithAlpha(alpha) {
@@ -335,9 +342,8 @@ class FireworkSystem {
     animate() {
         if (!this.isRunning) return;
 
-        // 清除畫布（半透明以產生拖尾效果）
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // 清除畫布（完全透明，讓相機背景可見）
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // 自動發射
         const now = Date.now();
