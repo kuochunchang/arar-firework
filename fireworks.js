@@ -169,16 +169,29 @@ class Firework {
         for (let i = 0; i < particleCount; i++) {
             let angle, speed, color;
 
-            if (explosionType < 0.3) {
+            if (explosionType < 0.25) {
                 // 圓形爆炸
                 angle = (Math.PI * 2 / particleCount) * i;
                 speed = 3 + Math.random() * 5;
-            } else if (explosionType < 0.6) {
+            } else if (explosionType < 0.5) {
                 // 隨機散射
                 angle = Math.random() * Math.PI * 2;
                 speed = 1 + Math.random() * 7;
+            } else if (explosionType < 0.7) {
+                // 雙層圓環
+                angle = (Math.PI * 2 / particleCount) * i;
+                speed = (i % 2 === 0) ? 2 + Math.random() * 2 : 5 + Math.random() * 3;
+            } else if (explosionType < 0.82) {
+                // 瀑布煙火（向上再落下）
+                angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.2;
+                speed = 2 + Math.random() * 4;
+            } else if (explosionType < 0.95) {
+                // 螺旋爆發
+                const t = (Math.PI * 2 / particleCount) * i;
+                angle = t + (i * 0.02);
+                speed = 2 + (i / particleCount) * 4;
             } else {
-                // 星形爆炸
+                // 花型爆炸 (5%)
                 const t = (Math.PI * 2 / particleCount) * i;
                 angle = t;
                 speed = 2 + Math.abs(Math.sin(t * 3)) * 5;
@@ -340,16 +353,32 @@ class FireworkSystem {
         for (let i = 0; i < particleCount; i++) {
             let angle, speed;
 
-            if (explosionType < 0.3) {
+            if (explosionType < 0.25) {
+                // 圓形爆炸
                 angle = (Math.PI * 2 / particleCount) * i;
-                speed = 1.5 + Math.random() * 2.5; // 縮小一半
-            } else if (explosionType < 0.6) {
+                speed = 1.5 + Math.random() * 2.5;
+            } else if (explosionType < 0.5) {
+                // 隨機散射
                 angle = Math.random() * Math.PI * 2;
-                speed = 0.5 + Math.random() * 3.5; // 縮小一半
+                speed = 0.5 + Math.random() * 3.5;
+            } else if (explosionType < 0.7) {
+                // 雙層圓環
+                angle = (Math.PI * 2 / particleCount) * i;
+                speed = (i % 2 === 0) ? 1 + Math.random() * 1.5 : 3 + Math.random() * 2;
+            } else if (explosionType < 0.82) {
+                // 瀑布煙火
+                angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.2;
+                speed = 1 + Math.random() * 3;
+            } else if (explosionType < 0.95) {
+                // 螺旋爆發
+                const t = (Math.PI * 2 / particleCount) * i;
+                angle = t + (i * 0.02);
+                speed = 1 + (i / particleCount) * 3;
             } else {
+                // 花型爆炸 (5%)
                 const t = (Math.PI * 2 / particleCount) * i;
                 angle = t;
-                speed = 1 + Math.abs(Math.sin(t * 3)) * 2.5; // 縮小一半
+                speed = 1 + Math.abs(Math.sin(t * 3)) * 3;
             }
 
             const color = colors[Math.floor(Math.random() * colors.length)];

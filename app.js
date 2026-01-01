@@ -48,20 +48,30 @@ class ARFireworkApp {
     }
 
     toggleFullscreen() {
+        // iOS Safari 只支援 video 全螢幕
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+        if (isIOS) {
+            // iOS: 嘗試影片全螢幕
+            if (this.video.webkitEnterFullscreen) {
+                this.video.webkitEnterFullscreen();
+            } else {
+                alert('Tip: Add this page to Home Screen for fullscreen experience!\n\nTap Share → Add to Home Screen');
+            }
+            return;
+        }
+
         const elem = document.documentElement;
 
         if (!this.isFullscreen()) {
-            // 進入全螢幕
             if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(err => console.warn('全螢幕失敗:', err));
+                elem.requestFullscreen().catch(err => {
+                    alert('Fullscreen not supported.\n\nTip: Add to Home Screen for fullscreen.');
+                });
             } else if (elem.webkitRequestFullscreen) {
-                // iOS Safari
                 elem.webkitRequestFullscreen();
-            } else if (elem.webkitEnterFullscreen) {
-                elem.webkitEnterFullscreen();
             }
         } else {
-            // 退出全螢幕
             if (document.exitFullscreen) {
                 document.exitFullscreen();
             } else if (document.webkitExitFullscreen) {
